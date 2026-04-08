@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculus Burn Prototype</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #ff3b30; margin-bottom: 10px; }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: #2c2c2e;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 120px;
+        }
+        .value { font-size: 1.5rem; font-weight: bold; color: #007aff; }
+        .label { font-size: 0.8rem; color: #8e8e93; text-transform: uppercase; }
+        canvas {
+            background: #000;
+            border-radius: 8px;
+            margin: 20px 0;
+            width: 100%;
+            height: 200px;
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: left;
+        }
+        label { display: block; margin-bottom: 10px; font-weight: bold; }
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+        .hint {
+            font-size: 0.9rem;
+            color: #8e8e93;
+            margin-top: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Fitness Tracker Sim</h1>
+        <p>Calculus in action: Integration of effort over time.</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div id="heartRateVal" class="value">70</div>
+                <div class="label">BPM (Rate)</div>
+            </div>
+            <div class="stat-box">
+                <div id="calorieVal" class="value">0.00</div>
+                <div class="label">Total Calories</div>
+            </div>
+        </div>
+
+        <canvas id="graph"></canvas>
+
+        <div class="controls">
+            <label for="effort">Adjust Your Effort (Intensity):</label>
+            <input type="range" id="effort" min="60" max="190" value="70">
+        </div>
+
+        <p class="hint">The blue area under the curve is the <b>Integral</b>—your total energy spent!</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graph');
+        const ctx = canvas.getContext('2d');
+        const effortSlider = document.getElementById('effort');
+        const heartRateDisp = document.getElementById('heartRateVal');
+        const calorieDisp = document.getElementById('calorieVal');
+
+        let totalCalories = 0;
+        let dataPoints = [];
+        const maxPoints = 100;
+
+        // Initialize points
+        for(let i=0; i<maxPoints; i++) dataPoints.push(70);
+
+        function update() {
+            const hr = parseInt(effortSlider.value);
+            heartRateDisp.innerText = hr;
+
+            // Simple "Burn Rate" formula: (HR - Resting) * constant
+            // This is the "derivative" value we are integrating
+            const burnRatePerSec = Math.max(0, (hr - 60) * 0.001);
+            
+            // Integration: adding the tiny slice to the total
+            // (Rate * 1/60th of a second)
+            totalCalories += burnRatePerSec / 60;
+            calorieDisp.innerText = totalCalories.toFixed(2);
+
+            // Update graph data
+            dataPoints.push(hr);
+            if(dataPoints.length > maxPoints) dataPoints.shift();
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw the "Integral" (Area under the curve)
+            ctx.fillStyle = 'rgba(0, 122, 255, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            
+            for(let i=0; i<dataPoints.length; i++) {
+                const x = (canvas.width / maxPoints) * i;
+                const y = canvas.height - ((dataPoints[i] - 60) / 140 * canvas.height);
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw the Line (The Rate)
+            ctx.strokeStyle = '#007aff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for(let i=0; i<dataPoints.length; i++) {
+                const x = (canvas.width / maxPoints) * i;
+                const y = canvas.height - ((dataPoints[i] - 60) / 140 * canvas.height);
+                if(i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        update();
+    </script>
+</body>
+</html>
