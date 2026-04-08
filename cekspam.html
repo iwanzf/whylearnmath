@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Filter Math Prototype</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 450px;
+            text-align: center;
+        }
+        h2 { color: #1a73e8; margin-top: 0; }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        textarea:focus { border-color: #1a73e8; }
+        .gauge-container {
+            background: #eee;
+            border-radius: 20px;
+            height: 30px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        #gauge {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(to right, #34a853, #fbbc05, #ea4335);
+            transition: width 0.3s ease;
+        }
+        .status {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+        .legend {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Spam-o-Meter</h2>
+    <p>Type keywords like <b>Winner, Cash, Account,</b> or <b>Urgent</b> to see the math update!</p>
+    
+    <textarea id="emailInput" placeholder="Write your email here..."></textarea>
+    
+    <div class="gauge-container">
+        <div id="gauge"></div>
+    </div>
+    
+    <div class="status" id="statusText">Probability of Spam: 50%</div>
+    <div class="status" id="verdict">Verdict: Neutral</div>
+
+    <div class="legend">
+        <strong>The Math at Work:</strong><br>
+         Starting "Prior" probability: 0.5<br>
+         Every "spammy" word updates the score using Bayesian weights.
+    </div>
+</div>
+
+<script>
+    const emailInput = document.getElementById('emailInput');
+    const gauge = document.getElementById('gauge');
+    const statusText = document.getElementById('statusText');
+    const verdict = document.getElementById('verdict');
+
+    // Bayesian weights for specific words
+    // Values > 1 increase spam probability, < 1 decrease it
+    const weights = {
+        'winner': 2.5,
+        'cash': 2.2,
+        'urgent': 1.8,
+        'account': 1.5,
+        'link': 1.4,
+        'jackpot': 3.0,
+        'crypto': 2.5,
+        'hey': 0.7,
+        'meeting': 0.5,
+        'lunch': 0.4,
+        'thanks': 0.6
+    };
+
+    emailInput.addEventListener('input', () => {
+        const text = emailInput.value.toLowerCase();
+        const words = text.split(/\s+/);
+        
+        let score = 0.5; // Start at 50%
+
+        words.forEach(word => {
+            if (weights[word]) {
+                // Simplified Bayesian update: 
+                // new_prob = (old * weight) / normalization
+                score = (score * weights[word]) / (score * weights[word] + (1 - score));
+            }
+        });
+
+        // Constrain score between 1% and 99% for visualization
+        const displayScore = Math.max(1, Math.min(99, Math.round(score * 100)));
+        
+        gauge.style.width = displayScore + '%';
+        statusText.innerText = `Probability of Spam: ${displayScore}%`;
+
+        if (displayScore > 80) {
+            verdict.innerText = "Verdict: TRASH IT ???";
+            verdict.style.color = "#ea4335";
+        } else if (displayScore < 30) {
+            verdict.innerText = "Verdict: LOOKS SAFE ?";
+            verdict.style.color = "#34a853";
+        } else {
+            verdict.innerText = "Verdict: NEUTRAL ??";
+            verdict.style.color = "#fbbc05";
+        }
+    });
+</script>
+
+</body>
+</html>
