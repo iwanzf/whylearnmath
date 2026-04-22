@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Math: The Undo Stack</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        canvas {
+            background: #fff;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 250px;
+        }
+        .stack-view {
+            border: 2px solid #444;
+            border-radius: 8px;
+            height: 300px;
+            display: flex;
+            flex-direction: column-reverse;
+            overflow-y: auto;
+            background: #252525;
+            padding: 5px;
+        }
+        .stack-item {
+            background: #3d5afe;
+            color: white;
+            margin: 2px 0;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .undo-btn { background: #ff5252; color: white; }
+        .undo-btn:hover { background: #ff1744; }
+        .draw-btn { background: #00e676; color: #000; }
+        h1 { margin-bottom: 10px; color: #00e676; }
+        p { color: #aaa; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>The Undo Stack Visualizer</h1>
+    <p>Click the canvas to add shapes. Each click is a "Push" to the Discrete Math stack.</p>
+
+    <div class="container">
+        <div class="canvas-area">
+            <canvas id="paintCanvas" width="500" height="400"></canvas>
+        </div>
+
+        <div class="controls">
+            <button class="undo-btn" onclick="undo()">Ctrl + Z (POP State)</button>
+            <div style="font-weight: bold; margin-top: 10px;">Visual Stack (LIFO):</div>
+            <div id="stackVisual" class="stack-view"></div>
+            <button class="draw-btn" onclick="clearCanvas()">Clear All</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const stackVisual = document.getElementById('stackVisual');
+        
+        // This is our Discrete Math "Stack" - a finite sequence of states
+        let historyStack = [];
+
+        // Save the initial blank state
+        saveState();
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Draw a random colored circle
+            const colors = ['#3d5afe', '#00e676', '#ff5252', '#ffea00', '#d500f9'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            ctx.fillStyle = randomColor;
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // PUSH the new state to our stack
+            saveState();
+        });
+
+        function saveState() {
+            // Push the current image data onto the stack
+            historyStack.push(canvas.toDataURL());
+            updateStackVisual();
+        }
+
+        function undo() {
+            if (historyStack.length > 1) {
+                // POP: Remove the current state
+                historyStack.pop();
+                
+                // Get the "new" top of the stack (the previous state)
+                const previousStateURL = historyStack[historyStack.length - 1];
+                
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = previousStateURL;
+                updateStackVisual();
+            }
+        }
+
+        function updateStackVisual() {
+            stackVisual.innerHTML = '';
+            historyStack.forEach((state, index) => {
+                const item = document.createElement('div');
+                item.className = 'stack-item';
+                item.innerText = `State #${index} (Snapshot)`;
+                stackVisual.appendChild(item);
+            });
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            historyStack = [];
+            saveState();
+        }
+    </script>
+</body>
+</html>
