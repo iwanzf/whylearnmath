@@ -6,8 +6,8 @@ Each snippet here connects a math idea to real-world applications, helping bridg
 
 # How to Use
 1. Clone the repository: git clone https://github.com/yourusername/why-we-learn-math.git
-2. Navigate to the desired folder.
-3. Run the code in your preferred environment (Python, Jupyter Notebook, etc.).
+2. Open the respective .html file in your browser.
+3. That's it :)
 
 # The Medium Posts
 https://medium.com/@whymath
