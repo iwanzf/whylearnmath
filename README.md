@@ -1,5 +1,5 @@
 # Why We Learn Math — Code Snippets
-A collection of code examples and mini-projects from my Medium articles exploring the why behind learning mathematics.
+A collection of code examples and mini-projects from my Medium and Substack articles exploring the why behind learning mathematics.
 This repo is designed to make abstract concepts more tangible through practical coding demonstrations.
 Mathematics is more than formulas — it’s a way of thinking.
 Each snippet here connects a math idea to real-world applications, helping bridge the gap between theory and practice.
@@ -9,8 +9,9 @@ Each snippet here connects a math idea to real-world applications, helping bridg
 2. Open the respective .html file in your browser.
 3. That's it :)
 
-# The Medium Posts
+# The Medium & Substack Posts
 https://medium.com/@whymath
+https://whymath.substack.com/
 
 # Contributing
 Contributions are welcome!
